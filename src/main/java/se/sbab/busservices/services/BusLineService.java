@@ -5,7 +5,7 @@ import se.sbab.busservices.response.TrafikLabResponse;
 
 import java.util.List;
 
-public interface BusService {
+public interface BusLineService {
     TrafikLabResponse getBusService(String modelType);
 
     List<BusResponse> getBusService();

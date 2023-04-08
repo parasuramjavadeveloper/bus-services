@@ -1,5 +1,6 @@
 package se.sbab.busservices.services;
 
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import se.sbab.busservices.config.ConfigProperties;
 import se.sbab.busservices.exception.InvalidBusTypeException;
 import se.sbab.busservices.exception.TrafikLabException;
@@ -28,23 +29,17 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class BusServiceImpl implements BusService{
-
-    @Autowired
-    private BusServiceURIBuilder busServiceURIBuilder;
-
+public class BusServiceImpl implements BusLineService {
     @Autowired
     private ConfigProperties configProperties;
 
     @Autowired
-    private RestTemplate restTemplate;
+    private WebClient webClient;
 
     @Override
     public TrafikLabResponse getBusService(String modelType) {
-        UriComponents uriComponents = busServiceURIBuilder.buildUri(configProperties.getBaseUrl(),configProperties.getKey(), BusModelType.findByAbbr(modelType),
+        return getBusServiceDetails(BusModelType.findByAbbr(modelType),
                 configProperties.getDefaultTransportModeCode());
-        log.info("Url = {}",uriComponents);
-        return makeCallTrafikLabApi(uriComponents);
     }
 
     @Override
@@ -54,7 +49,6 @@ public class BusServiceImpl implements BusService{
 
     public TrafikLabResponse getBusServiceDetails(BusModelType busModelType,String modelType){
         log.info("Executing webclient.......");
-        WebClient webClient = WebClient.create(configProperties.getBaseUrl());
         return webClient.get()
                 .uri(builder -> builder.path("/api2/LineData.json")
                         .queryParam("key", configProperties.getKey())
@@ -64,41 +58,7 @@ public class BusServiceImpl implements BusService{
                 .bodyToMono(TrafikLabResponse.class).block();
     }
 
-    private TrafikLabResponse makeCallTrafikLabApi(UriComponents requestURI){
-        try {
-            TrafikLabResponse response = restTemplate.getForObject(requestURI.toUri(), TrafikLabResponse.class);
-            return response;
-        }catch (HttpClientErrorException e) {
-            log.error("HttpClientErrorException caught when trying to make rest call requestUri={},exception={}",requestURI,e);
-            throw new TrafikLabException(String.format("HttpClientErrorException caught when trying to make rest call [requestUri=%s],[exception=%s]",requestURI,e.getMessage()));
-        }catch (HttpStatusCodeException e) {
-            log.error("HttpStatusCodeException caught when trying to make rest call requestUri={},exception={}",requestURI,e);
-            throw new TrafikLabException(String.format("HttpStatusCodeException caught when trying to make rest call [requestUri=%s],[exception=%s]",requestURI,e.getMessage()));
-        }catch (RestClientException e) {
-            log.error("RestClientException caught when trying to make rest call requestUri={},exception={}",requestURI,e);
-            throw new TrafikLabException(String.format("RestClientException caught when trying to make rest call [requestUri=%s],[exception=%s]",requestURI,e.getMessage()));
-        }
-    }
-
     private List<BusResponse> makeRestCalls(){
-        try {
-            TrafikLabResponse lineResponse = makeCallTrafikLabApi((busServiceURIBuilder.buildUri(configProperties.getBaseUrl(), configProperties.getKey(), BusModelType.LINE,
-                    configProperties.getDefaultTransportModeCode())));
-            log.info("Line=====request"+lineResponse);
-            TrafikLabResponse journeyPatternResponse = makeCallTrafikLabApi((busServiceURIBuilder.buildUri(configProperties.getBaseUrl(), configProperties.getKey(), BusModelType.JOURNEY_PATTERN_POINT_ONLINE,
-                    configProperties.getDefaultTransportModeCode())));
-            log.info("Journey=====request");
-            TrafikLabResponse stopPointResponse = makeCallTrafikLabApi((busServiceURIBuilder.buildUri(configProperties.getBaseUrl(), configProperties.getKey(), BusModelType.STOP_POINT,
-                    configProperties.getDefaultTransportModeCode())));
-            log.info("Stop=====request");
-            return parseBusLine(lineResponse, journeyPatternResponse, stopPointResponse);
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new InvalidBusTypeException(e.getMessage());
-        }
-    }
-
-    private List<BusResponse> makeRestCallsWebClients(){
         try {
             TrafikLabResponse lineResponse = getBusServiceDetails(BusModelType.LINE,configProperties.getDefaultTransportModeCode());
             log.info("Line=====request");
@@ -108,7 +68,6 @@ public class BusServiceImpl implements BusService{
             log.info("Stop=====request");
             return parseBusLine(lineResponse, journeyPatternResponse, stopPointResponse);
         }catch (Exception e){
-            e.printStackTrace();
             throw new InvalidBusTypeException(e.getMessage());
         }
     }
@@ -130,12 +89,11 @@ public class BusServiceImpl implements BusService{
                 .collect(Collectors.toList());
 
         return parseBusJourneyPoint(busLines, resultJourneyList, resultStops);
-
     }
 
-    private List<BusResponse> parseBusJourneyPoint(List<String> busLines, List<ResultJourney> resultJourneys, List<ResultStop> resultStops){
-        if(!CollectionUtils.isEmpty(busLines) && !ObjectUtils.isEmpty(resultJourneys) &&
-                !ObjectUtils.isEmpty(resultStops)) {
+    private List<BusResponse> parseBusJourneyPoint(List<String> busLines, List<ResultJourney> resultJourneys,
+                                                   List<ResultStop> resultStops){
+        if(!CollectionUtils.isEmpty(busLines) && !ObjectUtils.isEmpty(resultJourneys) && !ObjectUtils.isEmpty(resultStops)) {
             Map<String, List<String>> map = new HashMap<String, List<String>>();
             for (String line : busLines) {
                 for (ResultJourney journeyPoint : resultJourneys) {

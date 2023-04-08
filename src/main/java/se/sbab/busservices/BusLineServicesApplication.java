@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @OpenAPIDefinition
-public class BusServicesApplication {
+public class BusLineServicesApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BusServicesApplication.class, args);
+		SpringApplication.run(BusLineServicesApplication.class, args);
 	}
 
 }

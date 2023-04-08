@@ -2,23 +2,33 @@ package se.sbab.busservices.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class TrafikLabConfig {
 
-    @Bean
-    public RestTemplate getRestTemplate() {
-        return new RestTemplate();
-    }
-
-    @Bean
+    @Autowired
+    private ConfigProperties configProperties;
+   @Bean
     public ObjectMapper objectMapper(){
         ObjectMapper objectMapper =  new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         return objectMapper;
+    }
+
+    @Bean
+    public WebClient webClient() {
+        final ExchangeStrategies strategies = ExchangeStrategies.builder()
+                .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(60 * 1024 * 1024))
+                .build();
+        return WebClient.builder().exchangeStrategies(strategies)
+                .baseUrl(configProperties.getBaseUrl())
+                .build();
     }
 
 }
