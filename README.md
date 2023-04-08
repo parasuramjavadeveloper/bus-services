@@ -14,3 +14,5 @@ You can use external libraries if you would like to.
 ##Delivery 
 We would like you to share your code with us in advance so we can review it before we invite you to discuss the solution. 
 The solution should include the source code, the build script and instructions to run the application in MacOS/Unix or Windows.
+
+Swagger Documentation :- http://localhost:9091/swagger-ui/index.html#/bus-controller/busServiceDetails
