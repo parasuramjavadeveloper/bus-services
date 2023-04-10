@@ -8,6 +8,10 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+/**
+ * TrafikLabResponse holds Top 10 BusLines and Its BusStops response
+ * @author Parasuram
+ */
 public class TrafikLabResponse {
 
     @JsonProperty("StatusCode")

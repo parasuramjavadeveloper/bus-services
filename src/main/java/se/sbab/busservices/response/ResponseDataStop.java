@@ -10,6 +10,10 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+/**
+ * ResponseDataStop gives  BusStops api
+ * @author Parasuram
+ */
 public class ResponseDataStop {
     @JsonProperty("Version")
     public String version;

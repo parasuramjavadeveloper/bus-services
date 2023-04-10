@@ -9,6 +9,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+/**
+ * ResultJourney holds ResultJourney api response
+ * @author Parasuram
+ */
 public class ResultJourney extends Result{
     @JsonProperty("LineNumber")
     private String lineNumber;

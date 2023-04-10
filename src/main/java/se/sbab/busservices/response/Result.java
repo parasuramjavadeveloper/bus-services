@@ -15,6 +15,10 @@ import lombok.*;
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
+/**
+ * Result holds all subclasses api responses
+ * @author Parasuram
+ */
 public abstract class Result{
 
 

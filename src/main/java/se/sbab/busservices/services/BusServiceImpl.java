@@ -24,6 +24,10 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+/**
+ * BusServiceImpl calls TrafikLabs apis and gives the Top 10 BusLines and its BusNames
+ * @author Parasuram
+ */
 public class BusServiceImpl implements BusLineService {
     public static final String KEY = "key";
     public static final String DEFAULT_TRANSPORT_MODE_CODE = "DefaultTransportModeCode";
@@ -51,6 +55,9 @@ public class BusServiceImpl implements BusLineService {
         return makeRestCalls();
     }
 
+    /**
+     * Gives Top 10 BusLines and Its BusStopNames from API
+     */
     @Cacheable(value = "trafikLabResponse", key = "#busModelType.model")
     public TrafikLabResponse getBusServiceDetails(BusModelType busModelType,String modelType){
         log.info("Executing webclient.......");

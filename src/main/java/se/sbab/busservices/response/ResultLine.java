@@ -9,6 +9,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+/**
+ * ResultLine holds BusLines api response
+ * @author Parasuram
+ */
 public class ResultLine extends Result{
     @JsonProperty("LineNumber")
     private String lineNumber;

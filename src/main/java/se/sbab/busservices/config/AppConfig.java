@@ -8,12 +8,16 @@ import se.sbab.busservices.services.BusLineService;
 
 import java.util.Date;
 
+/**
+ * AppConfig helps to load the TrafikLab API's on application Startup
+ * @author Parasuram
+ */
 @Configuration
 @Slf4j
 public class AppConfig {
      
     @Bean
-    CommandLineRunner initDatabase(BusLineService busLineService) {
+    CommandLineRunner callTrafikLabAPIs(BusLineService busLineService) {
         return args -> {
             log.info("TrafikLab api execution  ........started = {}",new Date());
             busLineService.getBusService();

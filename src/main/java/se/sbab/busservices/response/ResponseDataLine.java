@@ -10,6 +10,10 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+/**
+ * ResponseDataLine gives  BusLines api
+ * @author Parasuram
+ */
 public class ResponseDataLine {
     @JsonProperty("Version")
     public String version;

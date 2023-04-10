@@ -17,6 +17,10 @@ import java.util.List;
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 100000L)
 @RequestMapping("/api/v1")
+/**
+ * BusLineController gives the REST EndPoint to get Top 10 BusLines and its bus stop names
+ * @author Parasuram
+ */
 public class BusLineController {
 
     @Autowired

@@ -9,6 +9,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+/**
+ * ResultStop holds BusStops api response
+ * @author Parasuram
+ */
 public class ResultStop extends Result{
     @JsonProperty("StopPointNumber")
     private String stopPointNumber;

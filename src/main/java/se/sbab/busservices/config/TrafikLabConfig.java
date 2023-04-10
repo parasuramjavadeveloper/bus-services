@@ -10,6 +10,10 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
+/**
+ * TrafikLabConfig helps to configure WeBClient and ObjectMapper which used to hit the API
+ * @author Parasuram
+ */
 public class TrafikLabConfig {
 
     @Autowired

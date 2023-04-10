@@ -10,6 +10,10 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+/**
+ * ResponseDataJourney gives  Journey api
+ * @author Parasuram
+ */
 public class ResponseDataJourney {
     @JsonProperty("Version")
     public String version;

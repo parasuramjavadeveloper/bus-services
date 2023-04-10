@@ -10,6 +10,10 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+/**
+ * ResponseData gives response for all TrafikLab apis
+ * @author Parasuram
+ */
 public class ResponseData {
     @JsonProperty("Version")
     public String version;

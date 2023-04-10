@@ -7,6 +7,10 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+/**
+ * ExceptionResponse Gives ExceptionResponse
+ * @author Parasuram
+ */
 public class ExceptionResponse {
 
     private String message;
