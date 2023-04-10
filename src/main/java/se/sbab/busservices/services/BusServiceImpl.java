@@ -1,10 +1,5 @@
 package se.sbab.busservices.services;
 
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
-import se.sbab.busservices.config.ConfigProperties;
-import se.sbab.busservices.exception.InvalidBusTypeException;
-import se.sbab.busservices.exception.TrafikLabException;
-import se.sbab.busservices.utils.BusModelType;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
@@ -13,16 +8,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponents;
+import se.sbab.busservices.config.ConfigProperties;
+import se.sbab.busservices.exception.InvalidBusTypeException;
+import se.sbab.busservices.exception.TrafikLabException;
 import se.sbab.busservices.response.*;
+import se.sbab.busservices.utils.BusModelType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,15 +25,24 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class BusServiceImpl implements BusLineService {
+    public static final String KEY = "key";
+    public static final String DEFAULT_TRANSPORT_MODE_CODE = "DefaultTransportModeCode";
+    public static final String MODEL = "model";
     @Autowired
     private ConfigProperties configProperties;
 
     @Autowired
     private WebClient webClient;
 
+    /*
+    * Autowired Self BusServiceImpl for cache method calling to another method.
+    * */
+    @Autowired
+    private BusServiceImpl busLineService;
+
     @Override
     public TrafikLabResponse getBusService(String modelType) {
-        return getBusServiceDetails(BusModelType.findByAbbr(modelType),
+        return busLineService.getBusServiceDetails(BusModelType.findByAbbr(modelType),
                 configProperties.getDefaultTransportModeCode());
     }
 
@@ -47,24 +51,25 @@ public class BusServiceImpl implements BusLineService {
         return makeRestCalls();
     }
 
+    @Cacheable(value = "trafikLabResponse", key = "#busModelType.model")
     public TrafikLabResponse getBusServiceDetails(BusModelType busModelType,String modelType){
         log.info("Executing webclient.......");
         return webClient.get()
                 .uri(builder -> builder.path("/api2/LineData.json")
-                        .queryParam("key", configProperties.getKey())
-                        .queryParam("DefaultTransportModeCode", modelType)
-                        .queryParam("model", busModelType.getModel()).build())
+                        .queryParam(KEY, configProperties.getKey())
+                        .queryParam(DEFAULT_TRANSPORT_MODE_CODE, modelType)
+                        .queryParam(MODEL, busModelType.getModel()).build())
                 .retrieve()
                 .bodyToMono(TrafikLabResponse.class).block();
     }
 
-    private List<BusResponse> makeRestCalls(){
+    public List<BusResponse> makeRestCalls(){
         try {
-            TrafikLabResponse lineResponse = getBusServiceDetails(BusModelType.LINE,configProperties.getDefaultTransportModeCode());
+            TrafikLabResponse lineResponse = busLineService.getBusServiceDetails(BusModelType.LINE,configProperties.getDefaultTransportModeCode());
             log.info("Line=====request");
-            TrafikLabResponse journeyPatternResponse = getBusServiceDetails(BusModelType.JOURNEY_PATTERN_POINT_ONLINE,configProperties.getDefaultTransportModeCode());
+            TrafikLabResponse journeyPatternResponse = busLineService.getBusServiceDetails(BusModelType.JOURNEY_PATTERN_POINT_ONLINE,configProperties.getDefaultTransportModeCode());
             log.info("Journey=====request");
-            TrafikLabResponse stopPointResponse = getBusServiceDetails(BusModelType.STOP_POINT,configProperties.getDefaultTransportModeCode());
+            TrafikLabResponse stopPointResponse = busLineService.getBusServiceDetails(BusModelType.STOP_POINT,configProperties.getDefaultTransportModeCode());
             log.info("Stop=====request");
             return parseBusLine(lineResponse, journeyPatternResponse, stopPointResponse);
         }catch (Exception e){
