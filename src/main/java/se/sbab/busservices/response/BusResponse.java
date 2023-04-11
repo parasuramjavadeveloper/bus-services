@@ -8,7 +8,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @AllArgsConstructor
 /**
- * BusResponse gives api response with top 10 buslines and its busnames
+ * BusResponse gives api response with top 10 BusLines and its BusNames
  * @author Parasuram
  */
 public class BusResponse {

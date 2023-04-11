@@ -8,5 +8,5 @@ import java.util.List;
 public interface BusLineService {
     TrafikLabResponse getBusService(String modelType);
 
-    List<BusResponse> getBusService();
+    List<BusResponse> getTopTenBusLinesAndBusStopNames();
 }

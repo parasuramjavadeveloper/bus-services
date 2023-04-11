@@ -5,22 +5,22 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 /**
- * TrafikLabConfig helps to configure WeBClient and ObjectMapper which used to hit the API
+ * TrafikLabConfig helps to configure WeBClient and ObjectMapper used to hit the API
  * @author Parasuram
  */
 public class TrafikLabConfig {
 
     @Autowired
     private ConfigProperties configProperties;
-   @Bean
-    public ObjectMapper objectMapper(){
-        ObjectMapper objectMapper =  new ObjectMapper();
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         return objectMapper;
     }

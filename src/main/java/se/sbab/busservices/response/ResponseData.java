@@ -16,10 +16,10 @@ import java.util.List;
  */
 public class ResponseData {
     @JsonProperty("Version")
-    public String version;
+    private String version;
     @JsonProperty("Type")
-    public String type;
+    private String type;
     @JsonProperty("Result")
-    public List<Result> result;
+    private List<Result> result;
 
 }

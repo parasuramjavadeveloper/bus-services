@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 /**
- * ConfigProperties helps read the TrafikLab API's BaseURL and APIKey
+ * ConfigProperties helps to read the TrafikLab API's BaseURL and APIKey
  * @author Parasuram
  */
 public class ConfigProperties {

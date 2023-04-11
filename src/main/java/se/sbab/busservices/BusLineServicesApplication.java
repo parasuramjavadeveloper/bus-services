@@ -27,7 +27,7 @@ public class BusLineServicesApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		log.info("TrafikLab api execution  ........started = {}",new Date());
-		busLineService.getBusService();
+		busLineService.getTopTenBusLinesAndBusStopNames();
 		log.info("TrafikLab api execution ........completed = {} ",new Date());
 	}
 }

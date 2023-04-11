@@ -16,8 +16,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  */
 public class CustomizedExceptionHandling extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(InvalidBusTypeException.class)
-    public ResponseEntity<Object> handleExceptions(InvalidBusTypeException exception, WebRequest webRequest) {
+    @ExceptionHandler(InValidBusTypeException.class)
+    public ResponseEntity<Object> handleExceptions(InValidBusTypeException exception, WebRequest webRequest) {
         ExceptionResponse response = new ExceptionResponse();
         response.setDateTime(LocalDateTime.now());
         response.setMessage(exception.getMessage());

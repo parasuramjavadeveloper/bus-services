@@ -15,11 +15,11 @@ import lombok.ToString;
 public class TrafikLabResponse {
 
     @JsonProperty("StatusCode")
-    public int statusCode;
+    private int statusCode;
     @JsonProperty("Message")
-    public Object message;
+    private Object message;
     @JsonProperty("ExecutionTime")
-    public int executionTime;
+    private int executionTime;
     @JsonProperty("ResponseData")
-    public ResponseData responseData;
+    private ResponseData responseData;
 }
