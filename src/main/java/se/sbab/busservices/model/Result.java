@@ -1,4 +1,4 @@
-package se.sbab.busservices.response;
+package se.sbab.busservices.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

@@ -1,4 +1,4 @@
-package se.sbab.busservices.response;
+package se.sbab.busservices.model;
 
 import lombok.*;
 
@@ -11,7 +11,7 @@ import java.util.Collection;
  * BusResponse gives api response with top 10 BusLines and its BusNames
  * @author Parasuram
  */
-public class BusResponse {
+public class BusLinesResponse {
     private String busLineName;
     private Collection<String> busStopNames;
 }

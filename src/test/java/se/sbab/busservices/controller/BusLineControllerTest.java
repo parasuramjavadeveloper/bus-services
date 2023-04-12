@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import se.sbab.busservices.response.BusResponse;
+import se.sbab.busservices.model.BusLinesResponse;
 import se.sbab.busservices.services.BusLineService;
 
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class BusLineControllerTest {
 
     @Test
     public void testTopThreeBusLinesAndItsBusStopNamesWhenValidURLGiven() throws Exception {
-        List<BusResponse> busResponses = getBusResponses();
+        List<BusLinesResponse> busResponses = getBusResponses();
         Mockito.when(busLineService.getTopTenBusLinesAndBusStopNames()).thenReturn(busResponses);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL)).andReturn();
         Assert.assertEquals(200, mvcResult.getResponse().getStatus());
@@ -59,19 +59,19 @@ public class BusLineControllerTest {
 
     @Test
     public void testTopThreeBusLinesAndItsBusStopNamesWhenInValidURLGiven() throws Exception {
-        List<BusResponse> busResponses = getBusResponses();
+        List<BusLinesResponse> busResponses = getBusResponses();
         Mockito.when(busLineService.getTopTenBusLinesAndBusStopNames()).thenReturn(busResponses);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(INVALID_BASE_URL)).andReturn();
         Assert.assertEquals(404, mvcResult.getResponse().getStatus());
     }
 
-    private List<BusResponse> getBusResponses() {
-        BusResponse busResponse = new BusResponse();
+    private List<BusLinesResponse> getBusResponses() {
+        BusLinesResponse busResponse = new BusLinesResponse();
         busResponse.setBusLineName("636");
         Collection<String> busStopNames = List.of("StationsGatan", "SundbybergStation", "SolnaBusinessPark", "SolnaCentrum",
                 "Hudusta", "Hallonberg", "Risny", "Odenplan", "StockholmSodra", "SolnaStation");
         busResponse.setBusStopNames(busStopNames);
-        List<BusResponse> busResponses = new ArrayList<>();
+        List<BusLinesResponse> busResponses = new ArrayList<>();
         busResponses.add(busResponse);
         return busResponses;
     }

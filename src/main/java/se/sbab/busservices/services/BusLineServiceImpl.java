@@ -16,8 +16,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import se.sbab.busservices.config.ConfigProperties;
 import se.sbab.busservices.exception.InValidBusTypeException;
 import se.sbab.busservices.exception.TrafikLabException;
-import se.sbab.busservices.response.*;
-import se.sbab.busservices.utils.BusModelType;
+import se.sbab.busservices.model.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,21 +31,16 @@ public class BusLineServiceImpl implements BusLineService {
     private static final String KEY = "key";
     private static final String DEFAULT_TRANSPORT_MODE_CODE = "DefaultTransportModeCode";
     private static final String MODEL = "model";
+
     @Autowired
     private ConfigProperties configProperties;
 
     @Autowired
     private WebClient webClient;
 
-    /**
-    * Autowired Self BusServiceImpl for cache method calling to another method.
-    */
-    @Autowired
-    private BusLineServiceImpl busLineService;
-
     @Override
     public TrafikLabResponse getBusService(String modelType) {
-        return busLineService.getBusServiceDetails(BusModelType.findByAbbr(modelType),
+        return this.getBusServiceDetails(BusModelType.findByAbbr(modelType),
                 configProperties.getDefaultTransportModeCode());
     }
 
@@ -54,7 +48,7 @@ public class BusLineServiceImpl implements BusLineService {
      * Gives Top 10 BusLines and Its BusStopNames from API
      */
     @Override
-    public List<BusResponse> getTopTenBusLinesAndBusStopNames() {
+    public List<BusLinesResponse> getTopTenBusLinesAndBusStopNames() {
         return callTrafikLabAPIs();
     }
 
@@ -73,13 +67,13 @@ public class BusLineServiceImpl implements BusLineService {
                 .bodyToMono(TrafikLabResponse.class).block();
     }
 
-    public List<BusResponse> callTrafikLabAPIs(){
+    public List<BusLinesResponse> callTrafikLabAPIs(){
         try {
-            TrafikLabResponse lineResponse = busLineService.getBusServiceDetails(BusModelType.LINE,configProperties.getDefaultTransportModeCode());
-            log.info("Line=====request");
-            TrafikLabResponse journeyPatternResponse = busLineService.getBusServiceDetails(BusModelType.JOURNEY_PATTERN_POINT_ONLINE,configProperties.getDefaultTransportModeCode());
+            TrafikLabResponse lineResponse = this.getBusServiceDetails(BusModelType.LINE,configProperties.getDefaultTransportModeCode());
+            log.info("Successfully Received Response from BusLineAPI");
+            TrafikLabResponse journeyPatternResponse = this.getBusServiceDetails(BusModelType.JOURNEY_PATTERN_POINT_ONLINE,configProperties.getDefaultTransportModeCode());
             log.info("Journey=====request");
-            TrafikLabResponse stopPointResponse = busLineService.getBusServiceDetails(BusModelType.STOP_POINT,configProperties.getDefaultTransportModeCode());
+            TrafikLabResponse stopPointResponse = this.getBusServiceDetails(BusModelType.STOP_POINT,configProperties.getDefaultTransportModeCode());
             log.info("Stop=====request");
             return parseBusLine(lineResponse, journeyPatternResponse, stopPointResponse);
         }catch (Exception e){
@@ -87,7 +81,7 @@ public class BusLineServiceImpl implements BusLineService {
         }
     }
 
-    private List<BusResponse> parseBusLine(TrafikLabResponse trafikLabResponseLine, TrafikLabResponse journeyPatternResponse, TrafikLabResponse stopPointResponse){
+    private List<BusLinesResponse> parseBusLine(TrafikLabResponse trafikLabResponseLine, TrafikLabResponse journeyPatternResponse, TrafikLabResponse stopPointResponse){
         List<String> busLines = trafikLabResponseLine.getResponseData().getResult()
                 .stream()
                 .map(e -> (ResultLine) e)
@@ -106,10 +100,10 @@ public class BusLineServiceImpl implements BusLineService {
         return parseBusJourneyPoint(busLines, resultJourneyList, resultStops);
     }
 
-    private List<BusResponse> parseBusJourneyPoint(List<String> busLines, List<ResultJourney> resultJourneys,
-                                                   List<ResultStop> resultStops){
+    private List<BusLinesResponse> parseBusJourneyPoint(List<String> busLines, List<ResultJourney> resultJourneys,
+                                                        List<ResultStop> resultStops){
         if(!CollectionUtils.isEmpty(busLines) && !ObjectUtils.isEmpty(resultJourneys) && !ObjectUtils.isEmpty(resultStops)) {
-            Map<String, List<String>> map = new HashMap<String, List<String>>();
+            Map<String, List<String>> map = new HashMap<>();
             for (String line : busLines) {
                 for (ResultJourney journeyPoint : resultJourneys) {
                     if (line.equals(journeyPoint.getLineNumber())) {
@@ -130,7 +124,7 @@ public class BusLineServiceImpl implements BusLineService {
         }
     }
 
-    private List<BusResponse> parseAndMapBusStop(Map<String,List<String>> map, List<ResultStop> results){
+    private List<BusLinesResponse> parseAndMapBusStop(Map<String,List<String>> map, List<ResultStop> results){
         Multimap<String, String> dataMultiMap = LinkedListMultimap.create();
         if(!CollectionUtils.isEmpty(map.values()) && !ObjectUtils.isEmpty(results) ) {
             map.entrySet().stream().sorted((left, right) ->Integer.compare(right.getValue().size(),
@@ -149,11 +143,11 @@ public class BusLineServiceImpl implements BusLineService {
 
     }
 
-    private List<BusResponse> formatAndPrintOutput(Map<String, Collection<String>> map){
+    private List<BusLinesResponse> formatAndPrintOutput(Map<String, Collection<String>> map){
 
         log.info("========================================================================================\n");
         log.info(String.format("Top 10 bus lines have the most bus stops on their route.BUSLINE : %s"
-                ,map.keySet().toString()));
+                ,map.keySet()));
         log.info("\n========================================================================================");
         Gson gsonBuilder = new GsonBuilder().setPrettyPrinting().create();
         String json = gsonBuilder.toJson(map);
@@ -161,9 +155,9 @@ public class BusLineServiceImpl implements BusLineService {
         JsonElement je = jp.parse(json);
         String prettyJsonString = gsonBuilder.toJson(je);
         log.info(prettyJsonString);
-        List<BusResponse> responses = new ArrayList<>();
+        List<BusLinesResponse> responses = new ArrayList<>();
         map.keySet().forEach(key->{
-            responses.add(new BusResponse(key,map.get(key)));
+            responses.add(new BusLinesResponse(key,map.get(key)));
         });
         return responses;
     }

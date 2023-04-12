@@ -1,4 +1,4 @@
-package se.sbab.busservices.utils;
+package se.sbab.busservices.model;
 
 public enum BusModelType {
 

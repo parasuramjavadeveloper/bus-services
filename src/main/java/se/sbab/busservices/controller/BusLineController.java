@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import se.sbab.busservices.response.BusResponse;
+import se.sbab.busservices.model.BusLinesResponse;
 import se.sbab.busservices.services.BusLineService;
 
 import java.util.List;
@@ -34,7 +34,7 @@ public class BusLineController {
             @ApiResponse(responseCode = "404", description = "Bus Service details not found", content = @Content)
     })
     @GetMapping("/bus/services")
-    public ResponseEntity<List<BusResponse>> busLineServiceDetails() {
+    public ResponseEntity<List<BusLinesResponse>> busLineServiceDetails() {
         return new ResponseEntity<>(busLineService.getTopTenBusLinesAndBusStopNames(), HttpStatus.OK);
     }
 }
