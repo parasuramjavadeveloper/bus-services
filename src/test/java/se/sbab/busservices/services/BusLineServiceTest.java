@@ -19,9 +19,7 @@ import se.sbab.busservices.config.ConfigProperties;
 import se.sbab.busservices.model.*;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
@@ -35,7 +33,7 @@ import static org.mockito.Mockito.when;
 public class BusLineServiceTest {
 
     @Autowired
-    private BusLineService busLineServiceImpl;
+    private BusLineService busLineService;
 
     @MockBean
     private WebClient webClientMock;
@@ -69,21 +67,19 @@ public class BusLineServiceTest {
 
     @Test
     public void testTopTenBusLinesAndBusStopNames() {
-        final var responseSpecMock = Mockito.mock(WebClient.ResponseSpec.class);
-        when(webClientMock.get())
-                .thenReturn(requestHeadersUriSpecMock);
-        when(requestHeadersUriSpecMock.uri((Function<UriBuilder, URI>) Mockito.any()))
-                .thenReturn(requestHeadersSpecMock);
-        when(requestHeadersSpecMock.retrieve())
-                .thenReturn(responseSpecMock);
-        when(responseSpecMock.bodyToMono((Class<Object>) Mockito.any()))
-                .thenReturn(Mono.just(getTrafikLabResponseLine())).thenReturn(Mono.just(getTrafikLabResponseJourney())).thenReturn(Mono.just(getTrafikLabResponseStopPoint()));
-        List<BusLinesResponse> busServices = busLineServiceImpl.getTopTenBusLinesAndBusStopNames();
+        whenCommonStubs();
+        List<BusLinesResponse> busServices = busLineService.getTopTenBusLinesAndBusStopNames();
         Assert.assertNotNull("Getting response", busServices);
     }
 
     @Test
-    public void testgetBusService() {
+    public void testBusLineServiceByModelTypeWithDefaultTransportModeCodeBUS() {
+        whenCommonStubs();
+        TrafikLabResponse busServiceResponse = busLineService.getBusService("ModelType");
+        Assert.assertNotNull("Getting response", busServiceResponse);
+    }
+
+    private void whenCommonStubs() {
         final var responseSpecMock = Mockito.mock(WebClient.ResponseSpec.class);
         when(webClientMock.get())
                 .thenReturn(requestHeadersUriSpecMock);
@@ -93,21 +89,8 @@ public class BusLineServiceTest {
                 .thenReturn(responseSpecMock);
         when(responseSpecMock.bodyToMono((Class<Object>) Mockito.any()))
                 .thenReturn(Mono.just(getTrafikLabResponseLine())).thenReturn(Mono.just(getTrafikLabResponseJourney())).thenReturn(Mono.just(getTrafikLabResponseStopPoint()));
-        TrafikLabResponse busServiceResponse = busLineServiceImpl.getBusService("ModelType");
-        Assert.assertNotNull("Getting response", busServiceResponse);
     }
 
-
-    private List<BusLinesResponse> getBusResponses() {
-        BusLinesResponse busResponse = new BusLinesResponse();
-        busResponse.setBusLineName("636");
-        Collection<String> busStopNames = Arrays.asList("StationsGatan", "SundbybergStation", "SolnaBusinessPark", "SolnaCentrum",
-                "Hudusta", "Hallonberg", "Risny", "Odenplan", "StockholmSodra", "SolnaStation");
-        busResponse.setBusStopNames(busStopNames);
-        List<BusLinesResponse> busResponses = new ArrayList<>();
-        busResponses.add(busResponse);
-        return busResponses;
-    }
 
     private TrafikLabResponse getTrafikLabResponseLine() {
         TrafikLabResponse response = new TrafikLabResponse();
