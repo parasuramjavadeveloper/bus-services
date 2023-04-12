@@ -20,7 +20,7 @@ import java.util.List;
 @CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 100000L)
 @RequestMapping("/api/v1")
 /**
- * BusLineController gives the REST EndPoint to get Top 10 BusLines and its bus stop names
+ * BusLineController gives the REST EndPoint to get the Top 10 BusLines and its BusStops
  * @author Parasuram
  */
 public class BusLineController {
@@ -34,7 +34,7 @@ public class BusLineController {
             @ApiResponse(responseCode = "404", description = "Bus Service details not found", content = @Content)
     })
     @GetMapping("/bus/services")
-    public ResponseEntity<List<BusLinesResponse>> busLineServiceDetails() {
+    public ResponseEntity<List<BusLinesResponse>> getTopTenBusLinesAndBusStops() {
         return new ResponseEntity<>(busLineService.getTopTenBusLinesAndBusStopNames(), HttpStatus.OK);
     }
 }

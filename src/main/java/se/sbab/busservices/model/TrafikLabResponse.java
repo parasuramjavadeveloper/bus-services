@@ -9,7 +9,7 @@ import lombok.ToString;
 @Setter
 @ToString
 /**
- * TrafikLabResponse holds Top 10 BusLines and Its BusStops response
+ * TrafikLabResponse holds Root Level Response From External API
  * @author Parasuram
  */
 public class TrafikLabResponse {

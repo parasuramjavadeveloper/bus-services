@@ -10,7 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 /**
- * TrafikLabConfig helps to create Beans for WeBClient,ObjectMapper which are used to hit the API
+ * TrafikLabConfig helps to create Beans for WeBClient,ObjectMapper which are used to hit the APIs
  * @author Parasuram
  */
 public class TrafikLabConfig {

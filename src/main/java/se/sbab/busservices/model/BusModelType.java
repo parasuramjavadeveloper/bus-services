@@ -1,5 +1,9 @@
 package se.sbab.busservices.model;
 
+/**
+ * BusModelType defines BusModelTypes
+ * @author Parasuram
+ */
 public enum BusModelType {
 
 	LINE("line"),
