@@ -50,10 +50,12 @@ public class BusLineServiceImpl implements BusLineService {
      */
     @Override
     public List<BusLinesResponse> getTopTenBusLinesAndBusStopNames() {
-        List<String> busSerLine = getBusSerLine();
-        return getTopTenBusLinesAndBusStopNames(mapBusLinesWithBusStops(mapBusLineAndJourneyPoint(busSerLine)).asMap());
+        return getTopTenBusLinesAndBusStopNames(mapBusLinesWithBusStops(mapBusLineAndJourneyPoint(getBusLinesFromAPI())).asMap());
     }
 
+    /**
+     * It gives the BusLinesResponse by populating Top 10 BusLines and its BusStops
+     */
     private List<BusLinesResponse> getTopTenBusLinesAndBusStopNames(Map<String, Collection<String>> map) {
         List<BusLinesResponse> response = new ArrayList<>();
         map.keySet().forEach(key -> {
@@ -77,7 +79,10 @@ public class BusLineServiceImpl implements BusLineService {
                 .bodyToMono(TrafikLabResponse.class).block();
     }
 
-    private List<String> getBusSerLine() {
+    /**
+     *  Reads TrafikLab API and gets BusLines From API
+     */
+    private List<String> getBusLinesFromAPI() {
         TrafikLabResponse lineResponse = busLineServiceImpl.getBusServiceDetails(BusModelType.LINE, configProperties.getDefaultTransportModeCode());
         log.info("Successfully Received Response from BusLineAPI");
         if (Objects.isNull(lineResponse)) {
