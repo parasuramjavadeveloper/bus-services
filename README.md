@@ -1,4 +1,4 @@
-## BusServices - Gives you the Top 10 Bus Lines and its BusNames by consuming TrafikLab External API's data 
+## BusServices gives you the Top 10 Bus Lines and its BusStops by consuming TrafikLab External API's data 
 
 ## Technologies/Tools Used
 Java 11,
