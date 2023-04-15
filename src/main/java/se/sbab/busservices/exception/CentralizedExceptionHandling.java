@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  * CustomizedExceptionHandling Gives Centralized ExceptionHandling
  * @author Parasuram
  */
-public class CustomizedExceptionHandling extends ResponseEntityExceptionHandler {
+public class CentralizedExceptionHandling extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(InValidBusTypeException.class)
     public ResponseEntity<Object> handleExceptions(InValidBusTypeException exception, WebRequest webRequest) {

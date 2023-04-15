@@ -72,13 +72,6 @@ public class BusLineServiceTest {
         Assert.assertNotNull("Getting response", busServices);
     }
 
-    @Test
-    public void testBusLineServiceByModelTypeWithDefaultTransportModeCodeBUS() {
-        whenCommonStubs();
-        TrafikLabResponse busServiceResponse = busLineService.getBusService("ModelType");
-        Assert.assertNotNull("Getting response", busServiceResponse);
-    }
-
     private void whenCommonStubs() {
         final var responseSpecMock = Mockito.mock(WebClient.ResponseSpec.class);
         when(webClientMock.get())

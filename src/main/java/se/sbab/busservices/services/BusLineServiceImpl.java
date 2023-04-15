@@ -3,6 +3,7 @@ package se.sbab.busservices.services;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -16,16 +17,18 @@ import se.sbab.busservices.model.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Service
-@Slf4j
+import static se.sbab.busservices.utils.BusConstants.*;
+
 /**
  * BusServiceImpl calls TrafikLabs apis and gives the Top 10 BusLines and its BusStops
+ *
  * @author Parasuram
  */
+@Service
+@Slf4j
+//@Data
 public class BusLineServiceImpl implements BusLineService {
-    private static final String KEY = "key";
-    private static final String DEFAULT_TRANSPORT_MODE_CODE = "DefaultTransportModeCode";
-    private static final String MODEL = "model";
+
 
     @Autowired
     private ConfigProperties configProperties;
@@ -37,31 +40,15 @@ public class BusLineServiceImpl implements BusLineService {
      * Self Autowired BusServiceImpl for cache method calling within the method for same class.
      */
     @Autowired
-    private BusLineServiceImpl busLineServiceImpl;
-
-    @Override
-    public TrafikLabResponse getBusService(String modelType) {
-        return this.getBusServiceDetails(BusModelType.findByAbbr(modelType),
-                configProperties.getDefaultTransportModeCode());
-    }
+    private BusLineServiceImpl self;
 
     /**
      * Gives Top 10 BusLines and Its BusStopNames from API
      */
     @Override
     public List<BusLinesResponse> getTopTenBusLinesAndBusStopNames() {
-        return getTopTenBusLinesAndBusStopNames(mapBusLinesWithBusStops(mapBusLineAndJourneyPoint(getBusLinesFromAPI())).asMap());
-    }
-
-    /**
-     * It gives the BusLinesResponse by populating Top 10 BusLines and its BusStops
-     */
-    private List<BusLinesResponse> getTopTenBusLinesAndBusStopNames(Map<String, Collection<String>> map) {
-        List<BusLinesResponse> response = new ArrayList<>();
-        map.keySet().forEach(key -> {
-            response.add(new BusLinesResponse(key, map.get(key)));
-        });
-        return response;
+        return getTopTenBusLinesAndBusStopNames(mapBusLinesWithBusStops(mapBusLineAndJourneyPoint(getBusLinesFromAPI()))
+                .asMap());
     }
 
     /**
@@ -69,6 +56,9 @@ public class BusLineServiceImpl implements BusLineService {
      */
     @Cacheable(value = "trafikLabResponse", key = "#busModelType.model")
     public TrafikLabResponse getBusServiceDetails(BusModelType busModelType, String modelType) {
+        if (StringUtils.isEmpty(modelType)) {
+            throw new InValidBusTypeException("Invalid Model bus type ");
+        }
         log.info("Executing WebClient.......");
         return webClient.get()
                 .uri(builder -> builder.path("/api2/LineData.json")
@@ -80,10 +70,21 @@ public class BusLineServiceImpl implements BusLineService {
     }
 
     /**
-     *  Reads TrafikLab API and gets BusLines From API
+     * It gives the BusLinesResponse by populating Top 10 BusLines and its BusStops
+     */
+    private List<BusLinesResponse> getTopTenBusLinesAndBusStopNames(Map<String, Collection<String>> map) {
+        List<BusLinesResponse> response = new ArrayList<>();
+        map.keySet().forEach(key -> response.add(new BusLinesResponse(key, map.get(key))));
+        return response;
+    }
+
+    /**
+     * Reads TrafikLab API and gets BusLines From API
      */
     private List<String> getBusLinesFromAPI() {
-        TrafikLabResponse lineResponse = busLineServiceImpl.getBusServiceDetails(BusModelType.LINE, configProperties.getDefaultTransportModeCode());
+        log.info("configProperties.getDefaultTransportModeCode() = {} ", configProperties.getDefaultTransportModeCode());
+        TrafikLabResponse lineResponse = self.getBusServiceDetails(BusModelType.LINE,
+                configProperties.getDefaultTransportModeCode());
         log.info("Successfully Received Response from BusLineAPI");
         if (Objects.isNull(lineResponse)) {
             throw new InValidBusTypeException("Invalid Bus type Exception ");
@@ -94,59 +95,64 @@ public class BusLineServiceImpl implements BusLineService {
                 .collect(Collectors.toList()).stream().map(ResultLine::getLineNumber).collect(Collectors.toList());
     }
 
-
     /**
-     *  Mapping with BusLines to JourneyPoint
-     *  and Returns Key as BusLine and Value as List of BusStops
+     * Mapping with BusLines to JourneyPoint
+     * and Returns Key as BusLine and Value as List of Journey Point
      */
     private Map<String, List<String>> mapBusLineAndJourneyPoint(List<String> busLines) {
-        TrafikLabResponse journeyPatternResponse = busLineServiceImpl.getBusServiceDetails(BusModelType.JOURNEY_PATTERN_POINT_ONLINE,
+        log.info("configProperties.getDefaultTransportModeCode() 2= {} ", configProperties.getDefaultTransportModeCode());
+        TrafikLabResponse journeyPatternResponse = self.getBusServiceDetails(BusModelType.JOURNEY_PATTERN_POINT_ONLINE,
                 configProperties.getDefaultTransportModeCode());
+        log.info("Journy{}", journeyPatternResponse.getResponseData());
         List<ResultJourney> resultJourneys = journeyPatternResponse.getResponseData().getResult()
                 .stream()
                 .map(e -> (ResultJourney) e)
                 .collect(Collectors.toList());
-        Map<String, List<String>> map = new HashMap<>();
+        Map<String, List<String>> busLineAndJourneyPoints = new HashMap<>();
         if (!CollectionUtils.isEmpty(busLines) && !ObjectUtils.isEmpty(resultJourneys)) {
             for (String line : busLines) {
                 for (ResultJourney journeyPoint : resultJourneys) {
-                    if (line.equals(journeyPoint.getLineNumber())) {
-                        if (map.containsKey(line)) {
-                            map.get(line).add(journeyPoint.getJourneyPatternPointNumber());
-                        } else {
-                            List<String> journeyPoints = new ArrayList<String>();
-                            journeyPoints.add(journeyPoint.getJourneyPatternPointNumber());
-                            map.put(line, journeyPoints);
-                        }
-                    }
+                    busLineAndJourneyPoints(busLineAndJourneyPoints, line, journeyPoint);
                 }
             }
         }
-        return map;
+        return busLineAndJourneyPoints;
+    }
+
+    private void busLineAndJourneyPoints(Map<String, List<String>> busLineAndJourneyPoints, String line,
+                                         ResultJourney journeyPoint) {
+        if (line.equals(journeyPoint.getLineNumber())) {
+            if (busLineAndJourneyPoints.containsKey(line)) {
+                busLineAndJourneyPoints.get(line).add(journeyPoint.getJourneyPatternPointNumber());
+            } else {
+                List<String> journeyPoints = new ArrayList<>();
+                journeyPoints.add(journeyPoint.getJourneyPatternPointNumber());
+                busLineAndJourneyPoints.put(line, journeyPoints);
+            }
+        }
     }
 
     /**
-     *  Mapping BusLines with BusStops
-     *  and Returns Key as BusLine and Value as List of BusStops
+     * Mapping BusLines with BusStops
+     * and Returns Key as BusLine and Value as List of BusStops
      */
     private Multimap<String, String> mapBusLinesWithBusStops(Map<String, List<String>> map) {
-        TrafikLabResponse stopPointResponse = busLineServiceImpl.getBusServiceDetails(BusModelType.STOP_POINT,
+        log.info("configProperties.getDefaultTransportModeCode() 3= {} ", configProperties.getDefaultTransportModeCode());
+        TrafikLabResponse stopPointResponse = self.getBusServiceDetails(BusModelType.STOP_POINT,
                 configProperties.getDefaultTransportModeCode());
         List<ResultStop> resultStops = stopPointResponse.getResponseData().getResult()
                 .stream()
                 .map(e -> (ResultStop) e)
                 .collect(Collectors.toList());
-        Multimap<String, String> dataMultiMap = LinkedListMultimap.create();
+        Multimap<String, String> busLineAndStops = LinkedListMultimap.create();
         if (!CollectionUtils.isEmpty(map.values()) && !ObjectUtils.isEmpty(resultStops)) {
             map.entrySet().stream().sorted((left, right) -> Integer.compare(right.getValue().size(),
                             left.getValue().size())).limit(10)
                     .forEach(stops -> stops.getValue().forEach(stop ->
                             resultStops.stream().filter(result -> stop.equals(result.getStopPointNumber()))
                                     .map(ResultStop::getStopPointName)
-                                    .forEach(res -> {
-                                        dataMultiMap.put(stops.getKey(), res);
-                                    })));
+                                    .forEach(res -> busLineAndStops.put(stops.getKey(), res))));
         }
-        return dataMultiMap;
+        return busLineAndStops;
     }
 }
