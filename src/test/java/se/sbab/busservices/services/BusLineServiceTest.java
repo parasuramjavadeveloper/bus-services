@@ -56,21 +56,6 @@ public class BusLineServiceTest {
     @Mock
     private WebClient.RequestHeadersUriSpec requestHeadersUriSpecMock;
 
-    @Test(expected = InValidBusTypeException.class)
-    public void getBusLinesFromAPIInvalidBusLineException() {
-        BusLineServiceImpl mockService = Mockito.mock(BusLineServiceImpl.class);
-        ReflectionTestUtils.setField(busLineService, "self", mockService);
-        Mockito.when(mockService.getBusServiceDetails(Mockito.any(), Mockito.any())).thenReturn(null);
-        busLineService.getTopTenBusLinesAndBusStopNames();
-    }
-
-    @Test(expected = InValidBusTypeException.class)
-    public void testTopTenBusLinesAndBusStopNamesNullModelType() {
-        ConfigProperties configPropertiesMock = new ConfigProperties();
-        ReflectionTestUtils.setField(busLineService, "configProperties", configPropertiesMock);
-        busLineService.getTopTenBusLinesAndBusStopNames();
-    }
-
     @Test
     public void testTopTenBusLinesAndBusStopNames() {
         ConfigProperties configProperties = new ConfigProperties();
@@ -90,6 +75,21 @@ public class BusLineServiceTest {
         List<BusLinesResponse> busServices = busLineService.getTopTenBusLinesAndBusStopNames();
         Assert.assertNotNull("Top 10 Bus Lines and Bus Stop Names", busServices);
         Assert.assertEquals(10, busServices.size());
+    }
+
+    @Test(expected = InValidBusTypeException.class)
+    public void getBusLinesFromAPIInvalidBusLineException() {
+        BusLineServiceImpl mockService = Mockito.mock(BusLineServiceImpl.class);
+        ReflectionTestUtils.setField(busLineService, "self", mockService);
+        Mockito.when(mockService.getBusServiceDetails(Mockito.any(), Mockito.any())).thenReturn(null);
+        busLineService.getTopTenBusLinesAndBusStopNames();
+    }
+
+    @Test(expected = InValidBusTypeException.class)
+    public void testTopTenBusLinesAndBusStopNamesNullModelType() {
+        ConfigProperties configPropertiesMock = new ConfigProperties();
+        ReflectionTestUtils.setField(busLineService, "configProperties", configPropertiesMock);
+        busLineService.getTopTenBusLinesAndBusStopNames();
     }
 
     private TrafikLabResponse getTrafikLabResponseLine() {
