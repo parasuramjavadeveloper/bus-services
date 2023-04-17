@@ -34,7 +34,9 @@ Language
 We would like you to use Java for the back-end.
 You are free to choose the version of JavaScript and Javascript. 
 You can use external libraries if you would like to.
-## Delivery 
+
+## Delivery
+
 We would like you to share your code with us in advance so we can review it before we invite you to discuss the solution. 
 The solution should include the source code, the build script and instructions to run the application in MacOS/Unix or Windows.
 
@@ -43,3 +45,8 @@ The solution should include the source code, the build script and instructions t
 On Application Startup reading TrafikLab APIs and compute the Top 10 BusLines and its BusStopNames and stores in the SpringBoot Cache Store.
 Developed the REST API with SpringBoot application and Swagger Documentation added for the API to Get the Top 10 BusLines and its BusStops.
 
+## Future Code Improvements 
+
+   1) Can configure spring cache deletion which helps to delete cache of API Response after a specified time.
+   2) Can add several Junit tests to test more scenarios and edge cases.
+   3) Can use JDK 17 and its features to replace if conditions using Optional.ofNullable().ifPresentOrElse() etc.
