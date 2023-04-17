@@ -51,12 +51,9 @@ public class BusLineControllerTest {
 
     @Test
     public void testTopThreeBusLinesAndItsBusStopNamesWhenValidURLGiven() throws Exception {
-        List<BusLinesResponse> busResponses = getBusResponses();
-        Mockito.when(busLineService.getTopTenBusLinesAndBusStopNames()).thenReturn(busResponses);
+        Mockito.when(busLineService.getTopTenBusLinesAndBusStopNames()).thenReturn(getBusResponses());
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL)).andReturn();
-        String res = mvcResult.getResponse().getContentAsString();
-        List responseList = objectMapper.readValue(res, List.class);
-        Assert.assertEquals(10, responseList.size());
+        Assert.assertEquals(10, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), List.class).size());
         Assert.assertEquals(200, mvcResult.getResponse().getStatus());
     }
 
