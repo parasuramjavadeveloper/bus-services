@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mock;
@@ -64,7 +63,6 @@ public class BusLineServiceTest {
 
     }
 
-    //Exception reading TrafikLab API and gets BusLines From API
     @Test(expected = InValidBusTypeException.class)
     public void getBusLinesFromAPIInvalidBusLineException() {
         BusLineServiceImpl mockService = Mockito.mock(BusLineServiceImpl.class);
@@ -73,7 +71,6 @@ public class BusLineServiceTest {
         busLineService.getTopTenBusLinesAndBusStopNames();
     }
 
-    //REAL METHOD: Success scenario
     @Test(expected = InValidBusTypeException.class)
     public void testTopTenBusLinesAndBusStopNamesNullModelType() {
         ConfigProperties configPropertiesMock =  new ConfigProperties();
@@ -81,7 +78,6 @@ public class BusLineServiceTest {
         busLineService.getTopTenBusLinesAndBusStopNames();
     }
 
-    //REAL METHOD: Success scenario
     @Test
     public void testTopTenBusLinesAndBusStopNames() {
         ConfigProperties  configProperties = new ConfigProperties();
@@ -579,85 +575,5 @@ public class BusLineServiceTest {
         responseData.setResult(results);
         response.setResponseData(responseData);
         return response;
-    }
-
-    private List<BusLinesResponse> getBusResponses() {
-        List<BusLinesResponse> busResponses = new ArrayList<>();
-        BusLinesResponse busResponse = new BusLinesResponse();
-        busResponse.setBusLineName("636");
-        Collection<String> busStopNames = List.of("StationsGatan", "SundbybergStation", "SolnaBusinessPark", "SolnaCentrum",
-                "Hudusta", "Hallonberg", "Risny", "Odenplan", "StockholmSodra", "SolnaStation");
-        busResponse.setBusStopNames(busStopNames);
-        busResponses.add(busResponse);
-
-        busResponse = new BusLinesResponse();
-        busResponse.setBusLineName("626");
-        busStopNames = List.of("Danderyds sjukhus", "Roslags Näsby trafikplats", "Åkersberga station", "Arninge station",
-                "Ekebo", "Tallebo", "Singö handel", "Brännbacken", "Hjälmsättra", "Lillsättra");
-        busResponse.setBusStopNames(busStopNames);
-        busResponses.add(busResponse);
-
-        busResponse = new BusLinesResponse();
-        busResponse.setBusLineName("637");
-        busStopNames = List.of("Norrtälje busstation", "Steneborg", "Norrfjäll", "Söderfjäll södra",
-                "Fjällbo", "Kolskär", "Backby", "Åmyran", "Boda", "Dalviken");
-        busResponse.setBusStopNames(busStopNames);
-        busResponses.add(busResponse);
-
-
-        busResponse = new BusLinesResponse();
-        busResponse.setBusLineName("620");
-        busStopNames = List.of("Åkersberga station", "Mellangården", "Ekhamravägen", "Sjöhamra",
-                "Gallboda", "Skogen", "Nykvarn", "Nyboda", "Fåfängan", "Lillnäs");
-        busResponse.setBusStopNames(busStopNames);
-        busResponses.add(busResponse);
-
-
-        busResponse = new BusLinesResponse();
-        busResponse.setBusLineName("639");
-        busStopNames = List.of("Danderyds sjukhus", "Karlberg", "Gillingebanan", "Kristinelund",
-                "Fälle", "Väsbylund", "Hagby", "Lugnet", "Nydal", "Görvälstorp");
-        busResponse.setBusStopNames(busStopNames);
-        busResponses.add(busResponse);
-
-
-        busResponse = new BusLinesResponse();
-        busResponse.setBusLineName("312");
-        busStopNames = List.of("Rånövägen","Åkeshovsvägen","Brommaplan","Nockeby","Brostugan","Drottningholm",
-                "Tillflykten","Lindö lada","Tappström","Ekebyhov","Ekvägen","Närlundavägen","Träkvista idrottsplats");
-        busResponse.setBusStopNames(busStopNames);
-        busResponses.add(busResponse);
-
-
-        busResponse = new BusLinesResponse();
-        busResponse.setBusLineName("652");
-        busStopNames = List.of("Norrtälje busstation","Norrtälje busstation","Narvagatan","Narvagatan","Rodenkyrkan",
-                "Utvägen","Utvägen","Grind","Grind","Solbacka" );
-        busResponse.setBusStopNames(busStopNames);
-        busResponses.add(busResponse);
-
-        busResponse = new BusLinesResponse();
-        busResponse.setBusLineName("785");
-        busStopNames = List.of("Hertig Carls väg","Scania centralkontor","Vibergen","Järna station",
-                "Överjärna kyrka","Smedjan","Skäve","Pilkrog norra","Pilkrog","Säbylund","Stensta","Ytter Eneby");
-        busResponse.setBusStopNames(busStopNames);
-        busResponses.add(busResponse);
-
-
-        busResponse = new BusLinesResponse();
-        busResponse.setBusLineName("783");
-        busStopNames = List.of("Vårsta centrum","Sjövreten","Smällan","Rosenhill","Polhemsgatan","Södertälje sjukhus",
-                "Högåsavägen","Hagabergs folkhögskola","Gökvägen","Gjuteriporten");
-        busResponse.setBusStopNames(busStopNames);
-        busResponses.add(busResponse);
-
-
-        busResponse = new BusLinesResponse();
-        busResponse.setBusLineName("631");
-        busStopNames = List.of( "Norrtälje busstation","Norrtälje busstation","Backtorp","Gustavslund",
-                "Gustavslund","Görla industriområde","Görla mellersta","Görla östra","Östhamra","Björnö gård","Strömsborg");
-        busResponse.setBusStopNames(busStopNames);
-        busResponses.add(busResponse);
-        return busResponses;
     }
 }
