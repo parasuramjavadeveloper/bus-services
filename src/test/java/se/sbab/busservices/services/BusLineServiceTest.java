@@ -3,7 +3,6 @@ package se.sbab.busservices.services;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mock;
@@ -25,7 +24,6 @@ import se.sbab.busservices.model.*;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
@@ -58,33 +56,28 @@ public class BusLineServiceTest {
     @Mock
     private WebClient.RequestHeadersUriSpec requestHeadersUriSpecMock;
 
-    @BeforeEach
-    public void init(){
-
-    }
-
     @Test(expected = InValidBusTypeException.class)
     public void getBusLinesFromAPIInvalidBusLineException() {
         BusLineServiceImpl mockService = Mockito.mock(BusLineServiceImpl.class);
-        ReflectionTestUtils.setField(busLineService,"self",mockService);
-        Mockito.when(mockService.getBusServiceDetails(Mockito.any(),Mockito.any())).thenReturn(null);
+        ReflectionTestUtils.setField(busLineService, "self", mockService);
+        Mockito.when(mockService.getBusServiceDetails(Mockito.any(), Mockito.any())).thenReturn(null);
         busLineService.getTopTenBusLinesAndBusStopNames();
     }
 
     @Test(expected = InValidBusTypeException.class)
     public void testTopTenBusLinesAndBusStopNamesNullModelType() {
-        ConfigProperties configPropertiesMock =  new ConfigProperties();
-        ReflectionTestUtils.setField(busLineService,"configProperties",configPropertiesMock);
+        ConfigProperties configPropertiesMock = new ConfigProperties();
+        ReflectionTestUtils.setField(busLineService, "configProperties", configPropertiesMock);
         busLineService.getTopTenBusLinesAndBusStopNames();
     }
 
     @Test
     public void testTopTenBusLinesAndBusStopNames() {
-        ConfigProperties  configProperties = new ConfigProperties();
+        ConfigProperties configProperties = new ConfigProperties();
         configProperties.setKey("5999d786b593421493702b5fa2528b7f");
         configProperties.setBaseUrl("https://api.sl.se");
         configProperties.setDefaultTransportModeCode("BUS");
-        ReflectionTestUtils.setField(busLineService,"configProperties",configProperties);
+        ReflectionTestUtils.setField(busLineService, "configProperties", configProperties);
         final var responseSpecMock = Mockito.mock(WebClient.ResponseSpec.class);
         when(webClientMock.get())
                 .thenReturn(requestHeadersUriSpecMock);
@@ -96,7 +89,7 @@ public class BusLineServiceTest {
                 .thenReturn(Mono.just(getTrafikLabResponseLine())).thenReturn(Mono.just(getTrafikLabResponseJourney())).thenReturn(Mono.just(getTrafikLabResponseStopPoint()));
         List<BusLinesResponse> busServices = busLineService.getTopTenBusLinesAndBusStopNames();
         Assert.assertNotNull("Top 10 Bus Lines and Bus Stop Names", busServices);
-        Assert.assertEquals(10,busServices.size());
+        Assert.assertEquals(10, busServices.size());
     }
 
     private TrafikLabResponse getTrafikLabResponseLine() {
@@ -320,7 +313,6 @@ public class BusLineServiceTest {
         results.add(result);
 
 
-
         result = new ResultStop();
         result.setStopPointName("S:t Eriksgatan");
         result.setStopPointNumber("10009");
@@ -339,7 +331,6 @@ public class BusLineServiceTest {
         result.setLastModifiedUtcDateTime("2022-10-28 00:00:00.000");
         result.setExistsFromDate("2022-10-28 00:00:00.000");
         results.add(result);
-
 
 
         result = new ResultStop();
@@ -414,7 +405,6 @@ public class BusLineServiceTest {
         response.setResponseData(responseData);
         return response;
     }
-
 
 
     private TrafikLabResponse getTrafikLabResponseJourney() {
