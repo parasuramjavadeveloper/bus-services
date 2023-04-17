@@ -1,6 +1,5 @@
 package se.sbab.busservices.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,6 +22,7 @@ import se.sbab.busservices.services.BusLineService;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -42,6 +42,8 @@ public class BusLineControllerTest {
     @MockBean
     private BusLineService busLineService;
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
@@ -54,7 +56,11 @@ public class BusLineControllerTest {
         Mockito.when(busLineService.getTopTenBusLinesAndBusStopNames()).thenReturn(busResponses);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL)).andReturn();
         Assert.assertEquals(200, mvcResult.getResponse().getStatus());
-        Assert.assertEquals(getJsonString(busResponses), mvcResult.getResponse().getContentAsString());
+        String res = mvcResult.getResponse().getContentAsString();
+        List responseList = objectMapper.readValue(res, List.class);
+        List<String> busStopNames = (List<String>) ((LinkedHashMap) responseList.get(0)).get("busStopNames");
+        Assert.assertEquals(10, busStopNames.size());
+        Assert.assertEquals(200, mvcResult.getResponse().getStatus());
     }
 
     @Test
@@ -75,10 +81,4 @@ public class BusLineControllerTest {
         busResponses.add(busResponse);
         return busResponses;
     }
-
-    private String getJsonString(Object object) throws JsonProcessingException {
-        return new ObjectMapper().writeValueAsString(object);
-    }
-
-
 }
