@@ -2,6 +2,7 @@ package se.sbab.busservices.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,10 +14,10 @@ import org.springframework.web.reactive.function.client.WebClient;
  * TrafikLabConfig helps to create Beans for WeBClient,ObjectMapper which are used to hit the APIs
  * @author Parasuram
  */
+@RequiredArgsConstructor
 public class TrafikLabConfig {
 
-    @Autowired
-    private ConfigProperties configProperties;
+    private final ConfigProperties configProperties;
 
     @Bean
     public ObjectMapper objectMapper() {
