@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @ToString
@@ -12,7 +14,7 @@ import lombok.ToString;
  * TrafikLabResponse holds Root Level Response From External API
  * @author Parasuram
  */
-public class TrafikLabResponse {
+public class TrafikLabResponse implements Serializable {
 
     @JsonProperty("StatusCode")
     private int statusCode;

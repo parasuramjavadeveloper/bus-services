@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
 
+import java.io.Serializable;
+
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
 @JsonSubTypes({
@@ -19,9 +21,4 @@ import lombok.*;
  * Result holds all subclasses api responses
  * @author Parasuram
  */
-public abstract class Result{
-
-
-
-
-}
+public abstract class Result implements Serializable {}

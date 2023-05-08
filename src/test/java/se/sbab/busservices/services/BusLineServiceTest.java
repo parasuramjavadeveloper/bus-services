@@ -1,92 +1,69 @@
 package se.sbab.busservices.services;
 
 import org.junit.Assert;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriBuilder;
-import reactor.core.publisher.Mono;
 import se.sbab.busservices.config.ConfigProperties;
 import se.sbab.busservices.exception.InValidBusTypeException;
 import se.sbab.busservices.model.*;
 
-import java.net.URI;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.when;
 
 
-@PropertySources(value = {@PropertySource("classpath:application.properties")})
-@RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ImportAutoConfiguration
-@ComponentScan("se.*")
-@FixMethodOrder(MethodSorters.DEFAULT)
+@RunWith(MockitoJUnitRunner.class)
 public class BusLineServiceTest {
 
-    @Autowired
+    @InjectMocks
     private BusLineServiceImpl busLineService;
 
-    @Mock
-    private WebClient webClientMock;
-
-    @SuppressWarnings("rawtypes")
-    @Mock
-    private WebClient.RequestHeadersSpec requestHeadersSpecMock;
 
     @Mock
-    private BusLineServiceImpl self;
+    private BusService busService;
 
 
-    @SuppressWarnings("rawtypes")
     @Mock
     private WebClient.RequestHeadersUriSpec requestHeadersUriSpecMock;
 
     @Test
-    public void testTopTenBusLinesAndBusStopNames() {
+    public void testTopTenBusLinesAndBusStopNames() throws IOException {
         ConfigProperties configProperties = new ConfigProperties();
         configProperties.setKey("5999d786b593421493702b5fa2528b7f");
         configProperties.setBaseUrl("https://api.sl.se");
         configProperties.setDefaultTransportModeCode("BUS");
         ReflectionTestUtils.setField(busLineService, "configProperties", configProperties);
-        final var responseSpecMock = Mockito.mock(WebClient.ResponseSpec.class);
-        when(webClientMock.get())
-                .thenReturn(requestHeadersUriSpecMock);
-        when(requestHeadersUriSpecMock.uri((Function<UriBuilder, URI>) Mockito.any()))
-                .thenReturn(requestHeadersSpecMock);
-        when(requestHeadersSpecMock.retrieve())
-                .thenReturn(responseSpecMock);
-        when(responseSpecMock.bodyToMono((Class<Object>) Mockito.any()))
-                .thenReturn(Mono.just(getTrafikLabResponseLine())).thenReturn(Mono.just(getTrafikLabResponseJourney())).thenReturn(Mono.just(getTrafikLabResponseStopPoint()));
+        when(busService.getBusServiceDetails(BusModelType.STOP_POINT)).thenReturn(getTrafikLabResponseStopPoint());
+        when(busService.getBusServiceDetails(BusModelType.JOURNEY_PATTERN_POINT_ONLINE)).thenReturn(getTrafikLabResponseJourney());
+        when(busService.getBusLinesFromAPI()).thenReturn(getTrafikLabResponseLine().getResponseData().getResult()
+            .stream()
+            .map(ResultLine.class::cast)
+            .map(ResultLine::getLineNumber)
+            .collect(Collectors.toList()));
+
+
         List<BusLinesResponse> busServices = busLineService.getTopTenBusLinesAndBusStopNames();
-        Assert.assertNotNull("Top 10 Bus Lines and Bus Stop Names", busServices);
-        Assert.assertEquals(10, busServices.size());
+        Assert.assertNotNull("Top 5 Bus Lines and Bus Stop Names", busServices);
+        Assert.assertEquals(5, busServices.size());
     }
 
     @Test(expected = InValidBusTypeException.class)
-    public void getBusLinesFromAPIInvalidBusLineException() {
-        BusLineServiceImpl mockService = Mockito.mock(BusLineServiceImpl.class);
-        ReflectionTestUtils.setField(busLineService, "self", mockService);
-        Mockito.when(mockService.getBusServiceDetails(Mockito.any(), Mockito.any())).thenReturn(null);
+    public void getBusLinesFromAPIInvalidBusLineException() throws IOException {
+        Mockito.when(busService.getBusServiceDetails(Mockito.any())).thenReturn(null);
         busLineService.getTopTenBusLinesAndBusStopNames();
     }
 
     @Test(expected = InValidBusTypeException.class)
-    public void testTopTenBusLinesAndBusStopNamesNullModelType() {
+    public void testTopTenBusLinesAndBusStopNamesNullModelType() throws IOException {
         ConfigProperties configPropertiesMock = new ConfigProperties();
         ReflectionTestUtils.setField(busLineService, "configProperties", configPropertiesMock);
         busLineService.getTopTenBusLinesAndBusStopNames();
@@ -425,8 +402,8 @@ public class BusLineServiceTest {
         results.add(result);
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
+        result.setLineNumber("112");
+        result.setDirectionCode("112");
         result.setJourneyPatternPointNumber("10012");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");
@@ -434,16 +411,26 @@ public class BusLineServiceTest {
 
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
+        result.setLineNumber("113");
+        result.setDirectionCode("113");
         result.setJourneyPatternPointNumber("10014");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");
         results.add(result);
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
+        result.setLineNumber("114");
+        result.setDirectionCode("114");
+        result.setJourneyPatternPointNumber("10015");
+        result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
+        result.setExistsFromDate("2022-02-15 00:00:00.000");
+        results.add(result);
+
+
+
+        result = new ResultJourney();
+        result.setLineNumber("115");
+        result.setDirectionCode("115");
         result.setJourneyPatternPointNumber("10016");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");
@@ -451,8 +438,8 @@ public class BusLineServiceTest {
 
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
+        result.setLineNumber("116");
+        result.setDirectionCode("116");
         result.setJourneyPatternPointNumber("10024");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");
@@ -460,8 +447,8 @@ public class BusLineServiceTest {
 
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
+        result.setLineNumber("117");
+        result.setDirectionCode("117");
         result.setJourneyPatternPointNumber("10034");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");
@@ -469,8 +456,8 @@ public class BusLineServiceTest {
 
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
+        result.setLineNumber("118");
+        result.setDirectionCode("118");
         result.setJourneyPatternPointNumber("10038");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");
@@ -478,8 +465,8 @@ public class BusLineServiceTest {
 
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
+        result.setLineNumber("119");
+        result.setDirectionCode("119");
         result.setJourneyPatternPointNumber("10042");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");
@@ -487,8 +474,8 @@ public class BusLineServiceTest {
 
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
+        result.setLineNumber("124");
+        result.setDirectionCode("124");
         result.setJourneyPatternPointNumber("10008");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");
@@ -505,49 +492,49 @@ public class BusLineServiceTest {
 
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
+        result.setLineNumber("127");
+        result.setDirectionCode("127");
         result.setJourneyPatternPointNumber("10062");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");
         results.add(result);
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
+        result.setLineNumber("151");
+        result.setDirectionCode("151");
         result.setJourneyPatternPointNumber("10061");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");
         results.add(result);
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
-        result.setJourneyPatternPointNumber("10059");
+        result.setLineNumber("152");
+        result.setDirectionCode("152");
+        result.setJourneyPatternPointNumber("10052");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");
         results.add(result);
 
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
+        result.setLineNumber("153");
+        result.setDirectionCode("153");
         result.setJourneyPatternPointNumber("10057");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");
         results.add(result);
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
+        result.setLineNumber("154");
+        result.setDirectionCode("154");
         result.setJourneyPatternPointNumber("10055");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");
         results.add(result);
 
         result = new ResultJourney();
-        result.setLineNumber("1");
-        result.setDirectionCode("1");
+        result.setLineNumber("155");
+        result.setDirectionCode("155");
         result.setJourneyPatternPointNumber("10053");
         result.setLastModifiedUtcDateTime("2022-02-15 00:00:00.000");
         result.setExistsFromDate("2022-02-15 00:00:00.000");

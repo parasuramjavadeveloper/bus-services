@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import se.sbab.busservices.model.BusLinesResponse;
 import se.sbab.busservices.services.BusLineService;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -23,10 +24,11 @@ import java.util.List;
  * BusLineController gives the REST EndPoint to get the Top 10 BusLines and its BusStops
  * @author Parasuram
  */
+@RequiredArgsConstructor
 public class BusLineController {
 
-    @Autowired
-    private BusLineService busLineService;
+
+    private final BusLineService busLineService;
 
     @Operation(summary = "This is to get the Top 10 BusLines and its BusStops")
     @ApiResponses(value = {
@@ -34,7 +36,8 @@ public class BusLineController {
             @ApiResponse(responseCode = "404", description = "Bus Service details not found", content = @Content)
     })
     @GetMapping("/bus/services")
-    public ResponseEntity<List<BusLinesResponse>> getTopTenBusLinesAndBusStops() {
+    public ResponseEntity<List<BusLinesResponse>> getTopTenBusLinesAndBusStops()
+        throws IOException {
         return new ResponseEntity<>(busLineService.getTopTenBusLinesAndBusStopNames(), HttpStatus.OK);
     }
 }

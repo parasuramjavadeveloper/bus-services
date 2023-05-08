@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Getter
@@ -14,7 +15,7 @@ import java.util.List;
  * ResponseData gives response for all TrafikLab apis
  * @author Parasuram
  */
-public class ResponseData {
+public class ResponseData implements Serializable {
     @JsonProperty("Version")
     private String version;
     @JsonProperty("Type")
